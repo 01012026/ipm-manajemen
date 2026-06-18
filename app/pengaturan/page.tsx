@@ -6,6 +6,16 @@ import { User, Shield, Moon, Sun, Bell, Lock, Info, LogOut, ChevronRight } from 
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 
+// Definisi Tipe Data agar TypeScript tidak error
+interface SettingItem {
+  icon: any;
+  label: string;
+  color: string;
+  bg: string;
+  action?: () => void;
+  value?: string;
+}
+
 export default function PengaturanPage() {
   const [userName, setUserName] = useState("Loading...");
   const [userRole, setUserRole] = useState("Loading...");
@@ -26,7 +36,8 @@ export default function PengaturanPage() {
     router.push("/login");
   };
 
-  const menuGroups = [
+  // Explicit typing untuk menuGroups agar aman
+  const menuGroups: { title: string; items: SettingItem[] }[] = [
     {
       title: "Akun Saya",
       items: [
@@ -38,7 +49,6 @@ export default function PengaturanPage() {
       title: "Preferensi Aplikasi",
       items: [
         { icon: Bell, label: "Notifikasi", color: "text-rose-500", bg: "bg-rose-100 dark:bg-rose-900/30" },
-        // Item khusus untuk Toggle Theme
         { 
           icon: theme === "dark" ? Moon : Sun, 
           label: "Mode Gelap", 
@@ -83,10 +93,11 @@ export default function PengaturanPage() {
           <motion.div key={group.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 * (idx + 1) }}>
             <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-3 ml-2 uppercase tracking-wider">{group.title}</h3>
             <div className="glass rounded-2xl overflow-hidden">
-              {group.items.map((item, i) => (
+              {group.items.map((item) => (
                 <div 
                   key={item.label}
-                  onClick={item.action}
+                  // Perbaikan: Gunakan opsional chaining ?. agar aman jika action tidak ada
+                  onClick={() => item.action?.()}
                   className="flex items-center justify-between p-4 border-b border-border last:border-0 hover:bg-surface-hover transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
@@ -106,7 +117,7 @@ export default function PengaturanPage() {
         ))}
       </div>
 
-      {/* Tombol Logout Raksasa (Khusus Mobile Friendly) */}
+      {/* Tombol Logout Raksasa */}
       <motion.button 
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
         onClick={handleLogout}
