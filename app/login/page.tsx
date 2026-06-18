@@ -17,10 +17,10 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setErrorMsg(""); // Reset error setiap kali klik login
+    setErrorMsg(""); 
     
-    // Trik "Pseudo-Email": Ubah username jadi format email biar Supabase mau
-    const pseudoEmail = `${username.toLowerCase()}@ipm.manajemen`;
+    // Format pseudo-email (pastikan di Supabase juga pakai @ipm.smkmbp)
+    const pseudoEmail = `${username.toLowerCase()}@ipm.smkmbp`;
     
     const { error } = await supabase.auth.signInWithPassword({
       email: pseudoEmail,
@@ -28,11 +28,15 @@ export default function LoginPage() {
     });
 
     if (error) {
+      // Kalau gagal, kasih tau errornya dan BERHENTIKAN loading
       setErrorMsg("Username atau Password salah!");
+      setIsLoading(false); 
     } else {
-      router.push("/"); // Kalau sukses, lempar ke halaman utama
+      // Kalau sukses, langsung gass pindah halaman!
+      // (Loading GAK USAH dimatiin biar tombol tetep muter nyampe halaman tujuan)
+      router.push("/"); 
+      router.refresh(); // Wajib ada biar Next.js sadar lu udah login
     }
-    setIsLoading(false);
   };
 
   return (
