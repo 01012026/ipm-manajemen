@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, User, Lock, Eye, EyeOff, ArrowRight, AlertCircle, Info } from "lucide-react";
+import { BookOpen, User, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function LoginPage() {
@@ -15,29 +15,16 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Logika Role: Admin vs Anggota
-    if (username === "admin" && password === "ipm123") {
-      setErrorMsg("");
-      document.cookie = "auth_token=karcis_admin; path=/; max-age=86400";
-      localStorage.setItem("userRole", "admin");
-      localStorage.setItem("userName", "Ahmad Dahlan (Admin)");
-      router.push("/");
-    } 
-    else if (username === "anggota" && password === "ipm123") {
-      setErrorMsg("");
-      document.cookie = "auth_token=karcis_anggota; path=/; max-age=86400";
-      localStorage.setItem("userRole", "anggota");
-      localStorage.setItem("userName", "Budi Santoso (Anggota)");
-      router.push("/");
-    } 
-    else {
-      setErrorMsg("Username atau Password tidak sesuai!");
-    }
+    // TODO: Masukkan logika otentikasi asli lu di sini nanti (misal: panggil Supabase/API)
+    console.log("Login attempt for:", username);
+    
+    // Contoh error handling sementara
+    setErrorMsg("Sistem login sedang dalam tahap pengembangan.");
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
-      {/* Ornamen Latar Belakang (Aksen Blur Navy & Amber) */}
+      {/* Ornamen Latar Belakang */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-primary/20 rounded-full blur-[100px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-600/10 rounded-full blur-[100px]" />
 
@@ -55,15 +42,6 @@ export default function LoginPage() {
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 text-center">
             Sistem Manajemen IPM
           </p>
-        </div>
-
-        {/* Info Akun Dummy */}
-        <div className="mb-6 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs flex flex-col gap-1.5">
-          <div className="flex items-center gap-1.5 font-bold mb-1">
-            <Info className="w-4 h-4" /> Daftar Akun Testing (Pw: ipm123)
-          </div>
-          <p>• Admin: <b>admin</b> (Akses Penuh)</p>
-          <p>• Anggota: <b>anggota</b> (Akses Terbatas)</p>
         </div>
 
         {errorMsg && (
