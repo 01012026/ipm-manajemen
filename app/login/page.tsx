@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen, User, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
-import { supabase } from "@/lib/supabase"; // Import helper yang udah lu bikin
+import { supabase } from "../../lib/supabase";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
