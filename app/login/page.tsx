@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../lib/supabase"; // Pastiin path ini bener ke file supabase lu
+import { supabase } from "../../lib/supabase"; // Pastiin path ini bener ke file supabase lu
 import { Eye, EyeOff, LogIn, BookOpen } from "lucide-react";
 
 export default function LoginPage() {
