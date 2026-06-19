@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../../lib/supabase";
 import { Users, CalendarCheck, ScanLine, Settings, FilePlus, Archive } from "lucide-react";
 
 export default function Dashboard() {
