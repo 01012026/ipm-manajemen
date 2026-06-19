@@ -18,7 +18,7 @@ export default function TambahAnggotaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F4F0] text-[#2C3E50] p-4 md:p-8 font-sans">
+    <div className="w-full text-[#2C3E50] p-4 md:p-8 font-sans">
       <div className="max-w-xl mx-auto space-y-6">
         
         {/* Header */}

@@ -1,73 +1,8 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Mendaftarkan Variabel CSS ke Tailwind */
-@theme {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
-  --color-surface-hover: var(--surface-hover);
-  --color-border: var(--border);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-}
-
-/* =========================================
-   1. LIGHT MODE (Tema Terang)
-   ========================================= */
-:root {
-  --background: #f8fafc; /* Abu-abu sangat terang */
-  --foreground: #0f172a; /* Hitam Navy */
-  
-  --surface: #ffffff; /* Putih bersih untuk Card */
-  --surface-hover: #f1f5f9;
-  --border: #e2e8f0;
-  
-  --primary: #d97706; /* IPM Amber (Kuning Emas) */
-  --primary-foreground: #ffffff;
-
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.5);
-}
-
-/* =========================================
-   2. DARK MODE (Tema Gelap)
-   ========================================= */
-.dark {
-  --background: #020617; /* Navy sangat gelap (hampir hitam) */
-  --foreground: #f8fafc; /* Teks putih terang */
-  
-  --surface: #0f172a; /* Card Navy elegan */
-  --surface-hover: #1e293b;
-  --border: #1e293b;
-  
-  --primary: #f59e0b; /* IPM Amber (Lebih menyala di mode gelap) */
-  --primary-foreground: #0f172a;
-
-  --glass-bg: rgba(15, 23, 42, 0.75);
-  --glass-border: rgba(30, 41, 59, 0.5);
-}
-
-/* Setelan dasar Body agar transisi tema mulus */
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-/* Efek Kaca (Glassmorphism) yang otomatis berubah di Light/Dark */
-.glass {
-  background-color: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-}
-
-/* Menyembunyikan scrollbar tapi tetap bisa di-scroll (Feel Aplikasi HP) */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  background-color: #F5F4F0 !important;
+  color: #2C3E50 !important;
 }

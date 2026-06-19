@@ -32,15 +32,15 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F4F0] text-[#2C3E50]">
+      <div className="w-full flex items-center justify-center py-32 text-[#2C3E50]">
         <p className="animate-pulse text-lg font-medium tracking-wide">Memuat sistem...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F4F0] text-[#2C3E50] pb-10 font-sans">
-      <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-8">
+    <div className="w-full text-[#2C3E50] font-sans pb-10 pt-4 px-4 md:px-8">
+      <div className="max-w-5xl mx-auto space-y-8">
         
         {/* Header Banner - Navy & Gold Classic */}
         <div className="bg-[#1E293B] rounded-2xl p-8 text-white relative overflow-hidden shadow-lg border border-[#334155]">
