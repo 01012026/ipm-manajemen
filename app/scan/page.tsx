@@ -1,68 +1,99 @@
 "use client";
 
-import { useState } from "react";
-import { Scanner } from "@yudiel/react-qr-scanner";
-import { ArrowLeft, ScanLine, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../lib/supabase";
+import { Users, CalendarCheck, ScanLine, Settings, FilePlus, Archive } from "lucide-react";
 
-export default function ScanPage() {
-  const [scanResult, setScanResult] = useState<string | null>(null);
+export default function Dashboard() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        router.push("/login");
+      } else {
+        // Tanya ke database: "Eh, jabatan user ini apa ya?"
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        setUserRole(profile?.role || 'anggota');
+        setIsLoading(false);
+      }
+    };
+
+    checkSession();
+  }, [router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
+        <p className="animate-pulse text-xl font-bold">Mengecek akses masuk...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-4 md:p-8 flex flex-col items-center">
+    <div className="space-y-6 pb-6 max-w-5xl mx-auto p-4 md:p-8">
       
-      {/* Header dengan tombol kembali */}
-      <div className="w-full max-w-md flex items-center gap-4 mb-8 pt-4">
-        <Link href="/">
-          <div className="p-2 bg-slate-800 rounded-xl hover:bg-slate-700 transition">
-            <ArrowLeft className="w-6 h-6 text-white" />
-          </div>
-        </Link>
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <ScanLine className="w-6 h-6 text-amber-500" />
-          Scan Kehadiran
-        </h1>
-      </div>
-
-      {/* Area Kamera */}
-      <div className="w-full max-w-md bg-slate-800 p-4 rounded-3xl shadow-2xl border border-slate-700">
-        <div className="aspect-square rounded-2xl overflow-hidden relative bg-black flex items-center justify-center">
+      {/* Header Banner */}
+      <div className="bg-slate-900 rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-xl border border-slate-800">
+        <div className="absolute top-[-50%] right-[-10%] w-64 h-64 bg-amber-500/40 rounded-full blur-3xl" />
+        <div className="relative z-10">
+          <p className="text-slate-300 mb-1 text-sm md:text-base">Assalamu'alaikum,</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-4">Selamat Datang di Dashboard! 👋</h1>
           
-          {/* Mesin Scanner YANG UDAH DIPERBARUI */}
-          <Scanner
-            onScan={(result) => {
-              // Di versi baru, hasilnya bentuk array, jadi kita ambil urutan ke-0
-              if (result && result.length > 0) {
-                setScanResult(result[0].rawValue);
-              }
-            }}
-            onError={(error: any) => console.log(error?.message || error)}
-            scanDelay={1000}
-          />
-
-          {/* Garis merah efek scanning */}
-          <div className="absolute top-1/2 left-0 w-full h-[2px] bg-red-500 shadow-[0_0_15px_red] animate-pulse" />
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-sm">
+            <span>✅ Login sebagai: <strong className="uppercase text-amber-400">{userRole}</strong></span>
+          </div>
         </div>
-        <p className="text-center text-sm text-slate-400 mt-4">
-          Arahkan QR Code Anggota ke dalam kotak kamera.
-        </p>
       </div>
 
-      {/* Hasil Scan */}
-      {scanResult && (
-        <div className="w-full max-w-md mt-6 p-4 bg-emerald-600/20 border border-emerald-500 rounded-2xl flex flex-col items-center text-center animate-in fade-in zoom-in duration-300">
-          <CheckCircle2 className="w-10 h-10 text-emerald-500 mb-2" />
-          <h2 className="text-lg font-bold text-emerald-400">Scan Berhasil!</h2>
-          <p className="text-slate-300 mt-1 break-all bg-slate-900 p-2 rounded-lg text-sm w-full">
-            Data: {scanResult}
-          </p>
-          <button 
-            onClick={() => setScanResult(null)}
-            className="mt-4 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-bold transition"
-          >
-            Scan Lagi
-          </button>
-        </div>
+      {/* Menu Umum (Bisa diakses Admin & Anggota) */}
+      <h2 className="text-xl font-bold mt-8 mb-4">Menu Utama</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+        {[
+          { name: "Anggota", icon: Users, color: "bg-amber-600", path: "/anggota" },
+          { name: "Absensi", icon: CalendarCheck, color: "bg-emerald-600", path: "/absensi" },
+        ].map((menu, i) => (
+          <Link key={i} href={menu.path}>
+            <div className={`p-4 rounded-2xl ${menu.color} flex flex-col items-center justify-center text-white shadow-lg transition-transform hover:scale-105 active:scale-95 gap-2`}>
+              <menu.icon className="w-8 h-8" />
+              <span className="font-semibold text-center">{menu.name}</span>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* MENU RAHASIA: Cuma muncul kalau yang login itu ADMIN */}
+      {userRole === 'admin' && (
+        <>
+          <h2 className="text-xl font-bold mt-8 mb-4 text-rose-500 flex items-center gap-2">
+            <Settings className="w-6 h-6" /> Menu Khusus Admin
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+            <Link href="/scan">
+              <div className="p-4 rounded-2xl bg-rose-600 flex flex-col items-center justify-center text-white shadow-lg transition-transform hover:scale-105 active:scale-95 gap-2">
+                <ScanLine className="w-8 h-8" />
+                <span className="font-semibold text-center">Scan QR</span>
+              </div>
+            </Link>
+            <Link href="/tambah-anggota">
+              <div className="p-4 rounded-2xl bg-blue-600 flex flex-col items-center justify-center text-white shadow-lg transition-transform hover:scale-105 active:scale-95 gap-2">
+                <FilePlus className="w-8 h-8" />
+                <span className="font-semibold text-center">Tambah Anggota</span>
+              </div>
+            </Link>
+          </div>
+        </>
       )}
 
     </div>
