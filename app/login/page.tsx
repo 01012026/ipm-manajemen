@@ -2,117 +2,114 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, User, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
-import { motion } from "framer-motion";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../lib/supabase"; // Pastiin path ini bener ke file supabase lu
+import { Eye, EyeOff, LogIn, BookOpen } from "lucide-react";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
+  const router = useRouter();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setErrorMsg(""); 
-    
-    // Format pseudo-email (pastikan di Supabase juga pakai @ipm.smkmbp)
-    const pseudoEmail = `${username.toLowerCase()}@ipm.smkmbp`;
-    
+    setLoading(true);
+    setErrorMsg("");
+
+    // Pakai Supabase Auth
     const { error } = await supabase.auth.signInWithPassword({
-      email: pseudoEmail,
+      email: email,
       password: password,
     });
 
     if (error) {
-      // Kalau gagal, kasih tau errornya dan BERHENTIKAN loading
-      setErrorMsg("Username atau Password salah!");
-      setIsLoading(false); 
+      setErrorMsg("Gagal masuk: Email atau Password salah.");
+      setLoading(false);
     } else {
-      // Kalau sukses, langsung gass pindah halaman!
-      // (Loading GAK USAH dimatiin biar tombol tetep muter nyampe halaman tujuan)
-      router.push("/"); 
-      router.refresh(); // Wajib ada biar Next.js sadar lu udah login
+      router.push("/"); // Arahin ke Dashboard kalau sukses
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-primary/20 rounded-full blur-[100px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-600/10 rounded-full blur-[100px]" />
-
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass w-full max-w-md p-8 md:p-10 rounded-[2rem] z-10 shadow-2xl relative"
-      >
-        <div className="flex flex-col items-center mb-6">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-primary/30">
-            <BookOpen className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">Selamat Datang</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 text-center">
-            Sistem Manajemen IPM
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl border border-[#E2E8F0] overflow-hidden">
+        
+        {/* Header Kartu Login - Navy & Gold */}
+        <div className="bg-[#1E293B] p-8 text-center relative overflow-hidden shadow-inner">
+          <div className="absolute top-[-50%] right-[-10%] w-40 h-40 bg-[#D4AF37]/20 rounded-full blur-3xl" />
+          <BookOpen className="w-12 h-12 text-[#D4AF37] mx-auto mb-4 relative z-10" />
+          <h1 className="text-2xl md:text-3xl font-bold text-[#F8FAFC] relative z-10 tracking-tight">
+            Selamat Datang
+          </h1>
+          <p className="text-[#94A3B8] mt-2 text-sm font-medium tracking-wide relative z-10">
+            Sistem Informasi Manajemen IPM
           </p>
         </div>
-
-        {errorMsg && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 flex items-center gap-2 text-red-600 dark:text-red-400 text-sm font-medium">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <p>{errorMsg}</p>
-          </motion.div>
-        )}
-
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground ml-1">Username</label>
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+        
+        {/* Form Login */}
+        <div className="p-8">
+          <form onSubmit={handleLogin} className="space-y-6">
+            
+            {/* Notifikasi Error */}
+            {errorMsg && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium text-center animate-pulse">
+                {errorMsg}
+              </div>
+            )}
+            
+            {/* Input Email/Username */}
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-[#334155] tracking-wide">Email Akun</label>
               <input 
-                type="text" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Masukkan username" 
+                type="email" 
+                placeholder="Masukkan email..." 
+                className="w-full px-4 py-3 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#1E293B] focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 focus:bg-white outline-none transition-all placeholder:text-slate-400 font-medium"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm shadow-sm text-foreground placeholder:text-slate-400"
               />
             </div>
-          </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground ml-1">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input 
-                type={showPassword ? "text" : "password"} 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••" 
-                required
-                className="w-full pl-12 pr-12 py-3.5 rounded-xl border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm shadow-sm text-foreground placeholder:text-slate-400"
-              />
-              <button 
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-foreground transition-colors"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
+            {/* Input Password */}
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-[#334155] tracking-wide">Password</label>
+              <div className="relative">
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="Masukkan password..." 
+                  className="w-full px-4 py-3 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#1E293B] focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 focus:bg-white outline-none transition-all placeholder:text-slate-400 font-medium"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#1E293B] transition-colors p-1"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3.5 rounded-xl font-bold hover:bg-amber-700 transition-all shadow-lg hover:shadow-primary/30 hover:-translate-y-1 mt-4 disabled:opacity-50"
-          >
-            {isLoading ? "Memproses..." : "Masuk Sekarang"} <ArrowRight className="w-4 h-4" />
-          </button>
-        </form>
-      </motion.div>
+            {/* Tombol Submit */}
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full bg-[#1E293B] hover:bg-[#0F172A] text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+            >
+              {loading ? "Memproses..." : (
+                <>
+                  Masuk Sekarang <LogIn className="w-5 h-5" />
+                </>
+              )}
+            </button>
+
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
