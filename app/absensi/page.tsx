@@ -1,197 +1,189 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Calendar, Clock, MapPin, Megaphone, Bell, ChevronRight, CheckCircle2, Users, X, FileSpreadsheet } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-
-// --- DUMMY DATA ---
-const agendas = [
-  { id: 1, title: "Rapat Evaluasi Bulanan", date: "20 Juni 2026", time: "15:30 WIB", location: "Aula Pimpinan Daerah", status: "Wajib Hadir" },
-  { id: 2, title: "Kajian Rutin Keislaman", date: "25 Juni 2026", time: "16:00 WIB", location: "Masjid Raya", status: "Terbuka" },
-];
-
-const infos = [
-  { id: 1, title: "Pendaftaran Kader Baru", date: "18 Juni 2026", content: "Telah dibuka pendaftaran Taruna Melati 1. Silakan bagikan formulir ke setiap ranting." },
-  { id: 2, title: "Iuran Bulanan", date: "15 Juni 2026", content: "Mengingatkan kembali untuk iuran kas bulan ini sudah bisa disetorkan ke Bendahara." },
-];
-
-// DUMMY DATA KEHADIRAN (Khusus Admin)
-const dummyAttendees = [
-  { id: 1, name: "Ahmad Dahlan", role: "Ketua Umum", time: "15:10 WIB" },
-  { id: 2, name: "Siti Walidah", role: "Sekretaris", time: "15:15 WIB" },
-  { id: 3, name: "Budi Santoso", role: "Anggota Bidang", time: "15:25 WIB" },
-];
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, QrCode, CalendarDays, History, MapPin, Clock, Camera, CheckCircle2 } from "lucide-react";
 
 export default function AbsensiPage() {
-  const [activeTab, setActiveTab] = useState<"agenda" | "info">("agenda");
-  const [userRole, setUserRole] = useState("anggota");
-  const [isRekapOpen, setIsRekapOpen] = useState(false);
-  const [selectedAgenda, setSelectedAgenda] = useState("");
-
-  useEffect(() => {
-    setUserRole(localStorage.getItem("userRole") || "anggota");
-  }, []);
-
-  const openRekap = (agendaTitle: string) => {
-    setSelectedAgenda(agendaTitle);
-    setIsRekapOpen(true);
-  };
+  const [activeTab, setActiveTab] = useState("scan");
+  const [isScanning, setIsScanning] = useState(false);
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto pb-8 relative">
-      {/* Header & Tabs */}
-      <div className="sticky top-0 z-20 pt-2 pb-4 bg-background/80 backdrop-blur-md">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Agenda & Info</h1>
+    <div className="min-h-screen bg-[#F8FAFC] pb-20 font-sans">
+      
+      {/* HEADER NAVY-GOLD */}
+      <div className="bg-[#1E293B] text-white p-6 md:p-8 rounded-b-3xl shadow-xl relative overflow-hidden">
+        <div className="absolute top-[-50%] right-[-10%] w-40 h-40 bg-[#D4AF37]/20 rounded-full blur-3xl" />
         
-        <div className="flex bg-white dark:bg-slate-900 border border-border p-1 rounded-xl shadow-sm">
+        <Link href="/" className="inline-flex items-center gap-2 text-[#D4AF37] hover:text-white transition-colors mb-6 relative z-10 font-bold">
+          <ArrowLeft className="w-5 h-5" /> Kembali ke Dashboard
+        </Link>
+        
+        <h1 className="text-2xl md:text-3xl font-black text-[#F8FAFC] relative z-10 tracking-tight">
+          Presensi & Kehadiran
+        </h1>
+        <p className="text-[#94A3B8] mt-2 text-sm font-medium tracking-wide relative z-10">
+          Sistem Absensi Digital Terintegrasi
+        </p>
+      </div>
+
+      {/* MENU TABS (NAVIGASI) */}
+      <div className="flex justify-center mt-[-20px] px-4 relative z-20">
+        <div className="bg-white p-1.5 rounded-2xl shadow-lg border border-[#E2E8F0] flex w-full max-w-md">
           <button 
-            onClick={() => setActiveTab("agenda")}
-            className={`flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === "agenda" ? "bg-navy dark:bg-primary text-white shadow-md" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"}`}
+            onClick={() => setActiveTab("scan")} 
+            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl transition-all ${activeTab === 'scan' ? 'bg-[#1E293B] text-[#D4AF37] shadow-md' : 'text-[#64748B] hover:bg-slate-50'}`}
           >
-            <Calendar className="w-4 h-4" /> Jadwal Kegiatan
+            <QrCode className="w-4 h-4" /> Scan QR
           </button>
           <button 
-            onClick={() => setActiveTab("info")}
-            className={`flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === "info" ? "bg-navy dark:bg-primary text-white shadow-md" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"}`}
+            onClick={() => setActiveTab("jadwal")} 
+            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl transition-all ${activeTab === 'jadwal' ? 'bg-[#1E293B] text-[#D4AF37] shadow-md' : 'text-[#64748B] hover:bg-slate-50'}`}
           >
-            <Megaphone className="w-4 h-4" /> Pengumuman
+            <CalendarDays className="w-4 h-4" /> Jadwal
+          </button>
+          <button 
+            onClick={() => setActiveTab("riwayat")} 
+            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl transition-all ${activeTab === 'riwayat' ? 'bg-[#1E293B] text-[#D4AF37] shadow-md' : 'text-[#64748B] hover:bg-slate-50'}`}
+          >
+            <History className="w-4 h-4" /> Riwayat
           </button>
         </div>
       </div>
 
-      {/* Konten Agenda */}
-      {activeTab === "agenda" && (
-        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-          {agendas.map((agenda, i) => (
-            <motion.div 
-              key={agenda.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-              className="glass p-5 rounded-2xl relative overflow-hidden group"
-            >
-              <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary rounded-l-2xl" />
-              
-              <div className="flex justify-between items-start mb-3 pl-2">
-                <h3 className="font-bold text-slate-900 dark:text-white text-lg leading-tight pr-4">{agenda.title}</h3>
-                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap ${agenda.status === "Wajib Hadir" ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" : "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"}`}>
-                  {agenda.status}
-                </span>
+      {/* KONTEN UTAMA */}
+      <div className="p-4 md:p-8 max-w-2xl mx-auto mt-4">
+
+        {/* TAB 1: SCANNER QR */}
+        {activeTab === 'scan' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#E2E8F0] text-center">
+              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600">
+                <QrCode className="w-8 h-8" />
               </div>
+              <h2 className="text-xl font-bold text-[#1E293B] mb-2">Scan QR Code Kehadiran</h2>
+              <p className="text-[#64748B] text-sm mb-8 px-4">Arahkan kamera ke QR Code yang ditampilkan oleh panitia acara untuk mengisi daftar hadir.</p>
               
-              <div className="space-y-2 pl-2 mb-4">
-                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                  <Calendar className="w-4 h-4 text-primary" /> {agenda.date}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                  <Clock className="w-4 h-4 text-primary" /> {agenda.time}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                  <MapPin className="w-4 h-4 text-primary" /> {agenda.location}
-                </div>
+              {/* Box Kamera Mockup */}
+              <div className="relative w-full max-w-sm mx-auto aspect-square bg-[#F8FAFC] rounded-3xl border-2 border-dashed border-[#CBD5E1] flex flex-col items-center justify-center overflow-hidden mb-6 group">
+                {isScanning ? (
+                  <div className="absolute inset-0 bg-black/5 flex items-center justify-center">
+                    <div className="w-full h-1 bg-[#D4AF37] absolute top-1/2 animate-ping shadow-[0_0_15px_#D4AF37]"></div>
+                    <p className="text-[#1E293B] font-bold animate-pulse">Memindai...</p>
+                  </div>
+                ) : (
+                  <>
+                    <Camera className="w-12 h-12 text-[#94A3B8] mb-3 group-hover:scale-110 transition-transform" />
+                    <p className="text-[#64748B] font-medium">Kamera Siap</p>
+                  </>
+                )}
+                {/* Frame Sudut Scan */}
+                <div className="absolute top-4 left-4 w-8 h-8 border-t-4 border-l-4 border-[#1E293B] rounded-tl-lg"></div>
+                <div className="absolute top-4 right-4 w-8 h-8 border-t-4 border-r-4 border-[#1E293B] rounded-tr-lg"></div>
+                <div className="absolute bottom-4 left-4 w-8 h-8 border-b-4 border-l-4 border-[#1E293B] rounded-bl-lg"></div>
+                <div className="absolute bottom-4 right-4 w-8 h-8 border-b-4 border-r-4 border-[#1E293B] rounded-br-lg"></div>
               </div>
 
-              {/* TOMBOL BERBEDA BERDASARKAN ROLE */}
-              <div className="pl-2 pt-2 border-t border-border">
-                 {userRole === "admin" ? (
-                   <button 
-                    onClick={() => openRekap(agenda.title)}
-                    className="w-full bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
-                   >
-                     <Users className="w-4 h-4" /> Lihat Daftar Hadir (3/35)
-                   </button>
-                 ) : (
-                   <button className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border border-border">
-                      <CheckCircle2 className="w-4 h-4" /> Konfirmasi Kehadiran
-                   </button>
-                 )}
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      )}
-
-      {/* Konten Pengumuman */}
-      {activeTab === "info" && (
-        <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-          {infos.map((info, i) => (
-            <motion.div key={info.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass p-5 rounded-2xl">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                  <Bell className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 dark:text-white leading-tight">{info.title}</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{info.date}</p>
-                </div>
-              </div>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-border pt-3">
-                {info.content}
-              </p>
-              <button className="mt-3 text-primary text-sm font-semibold flex items-center hover:underline">
-                Baca selengkapnya <ChevronRight className="w-4 h-4 ml-1" />
+              <button 
+                onClick={() => setIsScanning(!isScanning)}
+                className="w-full max-w-sm mx-auto bg-[#1E293B] hover:bg-[#0F172A] text-white font-bold py-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                <Camera className="w-5 h-5" />
+                {isScanning ? "Batalkan Scan" : "Mulai Scan QR"}
               </button>
-            </motion.div>
-          ))}
-        </motion.div>
-      )}
 
-      {/* POPUP DAFTAR HADIR (KHUSUS ADMIN) */}
-      <AnimatePresence>
-        {isRekapOpen && (
-          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center sm:p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setIsRekapOpen(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            />
-            
-            <motion.div 
-              initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col max-h-[85vh] z-10"
-            >
-              <div className="p-5 border-b border-border flex items-center justify-between sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-t-3xl md:rounded-3xl z-20">
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Rekap Kehadiran</h2>
-                  <p className="text-xs text-primary font-semibold truncate max-w-[200px]">{selectedAgenda}</p>
-                </div>
-                <button onClick={() => setIsRekapOpen(false)} className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full hover:text-slate-900 dark:hover:text-white transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="p-5 overflow-y-auto no-scrollbar flex-1">
-                <div className="space-y-3">
-                  {dummyAttendees.map((person, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold">
-                          {person.name.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="font-bold text-sm text-slate-900 dark:text-white">{person.name}</p>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400">{person.role}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="inline-block px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-md mb-1">
-                          Hadir
-                        </span>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{person.time}</p>
-                      </div>
-                    </div>
-                  ))}
+              <div className="mt-6 pt-6 border-t border-[#E2E8F0]">
+                <p className="text-sm font-bold text-[#64748B] mb-3">Atau masukkan PIN Kehadiran manual:</p>
+                <div className="flex gap-2 max-w-sm mx-auto">
+                  <input type="text" placeholder="Contoh: 8492" className="flex-1 px-4 py-3 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#1E293B] font-bold text-center tracking-widest focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 outline-none" />
+                  <button className="bg-[#D4AF37] hover:bg-[#B8962E] text-[#1E293B] font-bold px-6 rounded-xl transition-all">Submit</button>
                 </div>
               </div>
-
-              <div className="p-5 border-t border-border bg-slate-50 dark:bg-slate-900/50 rounded-b-3xl mt-auto">
-                <button className="w-full flex items-center justify-center gap-2 bg-emerald-500 text-white font-bold py-3 rounded-xl hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/30">
-                  <FileSpreadsheet className="w-5 h-5" /> Export ke Excel
-                </button>
-              </div>
-            </motion.div>
+            </div>
           </div>
         )}
-      </AnimatePresence>
 
+        {/* TAB 2: JADWAL KEGIATAN (Warna Teks Diperbaiki) */}
+        {activeTab === 'jadwal' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4">
+            
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E2E8F0]">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-lg font-black text-[#1E293B]">Rapat Evaluasi Bulanan</h3>
+                <span className="bg-red-100 text-red-600 text-xs font-bold px-3 py-1.5 rounded-full">Wajib Hadir</span>
+              </div>
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center gap-3 text-[#64748B] font-medium">
+                  <CalendarDays className="w-4 h-4 text-[#D4AF37]" /> 20 Juni 2026
+                </div>
+                <div className="flex items-center gap-3 text-[#64748B] font-medium">
+                  <Clock className="w-4 h-4 text-[#D4AF37]" /> 15:30 WIB
+                </div>
+                <div className="flex items-center gap-3 text-[#64748B] font-medium">
+                  <MapPin className="w-4 h-4 text-[#D4AF37]" /> Aula Pimpinan Daerah
+                </div>
+              </div>
+              <button className="w-full bg-[#1E293B] text-white font-bold py-3.5 rounded-xl hover:bg-[#0F172A] transition-colors flex justify-center items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-[#D4AF37]" /> Konfirmasi Kehadiran
+              </button>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E2E8F0]">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-lg font-black text-[#1E293B]">Kajian Rutin Keislaman</h3>
+                <span className="bg-emerald-100 text-emerald-600 text-xs font-bold px-3 py-1.5 rounded-full">Terbuka</span>
+              </div>
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center gap-3 text-[#64748B] font-medium">
+                  <CalendarDays className="w-4 h-4 text-[#D4AF37]" /> 25 Juni 2026
+                </div>
+                <div className="flex items-center gap-3 text-[#64748B] font-medium">
+                  <Clock className="w-4 h-4 text-[#D4AF37]" /> 16:00 WIB
+                </div>
+                <div className="flex items-center gap-3 text-[#64748B] font-medium">
+                  <MapPin className="w-4 h-4 text-[#D4AF37]" /> Masjid Raya
+                </div>
+              </div>
+              <button className="w-full bg-[#1E293B] text-white font-bold py-3.5 rounded-xl hover:bg-[#0F172A] transition-colors flex justify-center items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-[#D4AF37]" /> Konfirmasi Kehadiran
+              </button>
+            </div>
+
+          </div>
+        )}
+
+        {/* TAB 3: RIWAYAT KEHADIRAN */}
+        {activeTab === 'riwayat' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+             <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] overflow-hidden">
+                <div className="p-4 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+                  <h3 className="font-bold text-[#1E293B]">Bulan Juni 2026</h3>
+                </div>
+                <div className="divide-y divide-[#E2E8F0]">
+                  <div className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                    <div>
+                      <h4 className="font-bold text-[#1E293B]">Pelatihan Jurnalistik</h4>
+                      <p className="text-xs text-[#64748B] mt-1">10 Juni 2026 • 09:15 WIB</p>
+                    </div>
+                    <span className="text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-lg text-sm flex items-center gap-1">
+                      <CheckCircle2 className="w-4 h-4" /> Hadir
+                    </span>
+                  </div>
+                  <div className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                    <div>
+                      <h4 className="font-bold text-[#1E293B]">Musyawarah Ranting</h4>
+                      <p className="text-xs text-[#64748B] mt-1">05 Juni 2026 • 13:00 WIB</p>
+                    </div>
+                    <span className="text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-lg text-sm flex items-center gap-1">
+                      <CheckCircle2 className="w-4 h-4" /> Hadir
+                    </span>
+                  </div>
+                </div>
+             </div>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }

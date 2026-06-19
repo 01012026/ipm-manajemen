@@ -1,137 +1,164 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { Users, CalendarCheck, ScanLine, Settings, FilePlus, Megaphone, PlusCircle, BookOpen, LogOut } from "lucide-react";
+import { Users, BookOpen, CalendarCheck, Megaphone, LogOut, LayoutDashboard, Settings, User } from "lucide-react";
 
-export default function Dashboard() {
+export default function DashboardPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(true);
 
+  // Ngecek apakah user beneran udah login
   useEffect(() => {
-    const checkSession = async () => {
+    const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        router.push("/login");
+        router.push("/login"); // Kalau belum login, tendang ke luar
       } else {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
-
-        setUserRole(profile?.role || 'anggota');
-        setIsLoading(false);
+        setEmail(session.user.email || "");
+        setLoading(false);
       }
     };
-    checkSession();
+    checkUser();
   }, [router]);
 
+  // Fungsi Logout
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
   };
 
-  if (isLoading) {
-    return (
-      <div className="w-full flex items-center justify-center py-32 text-[#2C3E50]">
-        <p className="animate-pulse text-lg font-medium tracking-wide">Memuat sistem...</p>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D4AF37]"></div>
+    </div>
+  );
 
   return (
-    <div className="w-full min-h-screen text-[#2C3E50] font-sans pb-10 pt-4 px-4 md:px-8">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#F8FAFC] flex font-sans">
+      
+      {/* 1. SIDEBAR KIRI (NAVIGASI UTAMA) */}
+      <aside className="w-64 bg-[#1E293B] text-white hidden md:flex flex-col shadow-2xl relative z-20">
+        <div className="p-6 border-b border-slate-700/50">
+          <div className="flex items-center gap-3 text-[#D4AF37]">
+            <BookOpen className="w-8 h-8" />
+            <h1 className="font-bold text-2xl tracking-wider">IPM APP</h1>
+          </div>
+        </div>
         
-        {/* Header Banner - Navy & Gold Classic */}
-        <div className="bg-[#1E293B] rounded-3xl p-8 text-white relative overflow-hidden shadow-xl border border-[#334155]">
-          <div className="absolute top-[-50%] right-[-10%] w-64 h-64 bg-[#D4AF37]/20 rounded-full blur-3xl" />
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <a href="#" className="flex items-center gap-3 bg-[#D4AF37] text-[#1E293B] px-4 py-3.5 rounded-xl font-bold transition-all shadow-md">
+            <LayoutDashboard className="w-5 h-5" /> Dashboard
+          </a>
+          <a href="#" className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 hover:text-white px-4 py-3.5 rounded-xl font-medium transition-all">
+            <Users className="w-5 h-5" /> Data Anggota
+          </a>
+          <a href="#" className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 hover:text-white px-4 py-3.5 rounded-xl font-medium transition-all">
+            <BookOpen className="w-5 h-5" /> Materi & Jurnal
+          </a>
+          <a href="#" className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 hover:text-white px-4 py-3.5 rounded-xl font-medium transition-all">
+            <CalendarCheck className="w-5 h-5" /> Absensi
+          </a>
+          <a href="#" className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 hover:text-white px-4 py-3.5 rounded-xl font-medium transition-all">
+            <Settings className="w-5 h-5" /> Pengaturan Sistem
+          </a>
+        </nav>
+
+        <div className="p-4 border-t border-slate-700/50">
+          <button 
+            onClick={handleLogout} 
+            className="flex items-center justify-center gap-3 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-4 py-3.5 rounded-xl font-bold transition-all w-full"
+          >
+            <LogOut className="w-5 h-5" /> Keluar Akun
+          </button>
+        </div>
+      </aside>
+
+      {/* 2. KONTEN UTAMA KANAN */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+        
+        {/* Topbar / Header Atas */}
+        <header className="bg-white shadow-sm border-b border-[#E2E8F0] p-4 md:px-8 flex justify-between items-center relative z-10">
+          <h2 className="text-xl md:text-2xl font-bold text-[#1E293B]">Dashboard Manajemen</h2>
+          <div className="flex items-center gap-3 bg-[#F8FAFC] py-2 px-4 rounded-full border border-[#CBD5E1] shadow-sm">
+            <User className="w-5 h-5 text-[#94A3B8]" />
+            <span className="text-sm font-bold text-[#334155]">{email}</span>
+            <span className="bg-[#D4AF37] text-[#1E293B] text-xs font-bold px-2 py-1 rounded-md ml-2">ADMIN</span>
+          </div>
+        </header>
+
+        {/* Isi Dashboard (Bisa di-scroll) */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
           
-          {/* Tombol Logout */}
-          <div className="absolute top-6 right-6 z-20">
-            <button 
-              onClick={handleLogout} 
-              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-sm text-white transition-all shadow-sm"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline font-medium">Keluar</span>
-            </button>
+          {/* Banner Ucapan Selamat Datang */}
+          <div className="bg-[#1E293B] rounded-3xl p-8 text-white shadow-xl mb-8 relative overflow-hidden">
+            <div className="absolute top-[-50%] right-[-5%] w-64 h-64 bg-[#D4AF37]/20 rounded-full blur-3xl" />
+            <div className="absolute bottom-[-20%] left-[-5%] w-40 h-40 bg-blue-500/20 rounded-full blur-3xl" />
+            <h3 className="text-3xl font-bold mb-3 relative z-10 tracking-tight">Assalamu'alaikum, Admin!</h3>
+            <p className="text-[#94A3B8] relative z-10 text-lg">
+              Selamat datang di pusat kendali Sistem Informasi Manajemen IPM. 
+            </p>
           </div>
 
-          <div className="relative z-10">
-            <p className="text-[#94A3B8] mb-1 text-sm md:text-base font-medium tracking-wide">Assalamu'alaikum,</p>
-            <h1 className="text-2xl md:text-3xl font-bold text-[#F8FAFC] mb-5 tracking-tight">
-              Sistem Informasi Manajemen
-            </h1>
+          {/* Kartu Statistik */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E2E8F0] flex items-center gap-5 hover:shadow-md transition-shadow hover:border-[#D4AF37]/50">
+              <div className="bg-blue-50 p-4 rounded-xl text-blue-600">
+                <Users className="w-8 h-8" />
+              </div>
+              <div>
+                <p className="text-sm text-[#64748B] font-bold">Total Anggota</p>
+                <p className="text-3xl font-black text-[#1E293B]">124</p>
+              </div>
+            </div>
             
-            <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10 text-sm">
-              <span className="text-slate-300">Hak Akses: <strong className="uppercase text-[#D4AF37] tracking-wider ml-1">{userRole}</strong></span>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E2E8F0] flex items-center gap-5 hover:shadow-md transition-shadow hover:border-[#D4AF37]/50">
+              <div className="bg-emerald-50 p-4 rounded-xl text-emerald-600">
+                <BookOpen className="w-8 h-8" />
+              </div>
+              <div>
+                <p className="text-sm text-[#64748B] font-bold">Total Materi</p>
+                <p className="text-3xl font-black text-[#1E293B]">38</p>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E2E8F0] flex items-center gap-5 hover:shadow-md transition-shadow hover:border-[#D4AF37]/50">
+              <div className="bg-purple-50 p-4 rounded-xl text-purple-600">
+                <CalendarCheck className="w-8 h-8" />
+              </div>
+              <div>
+                <p className="text-sm text-[#64748B] font-bold">Tingkat Absensi</p>
+                <p className="text-3xl font-black text-[#1E293B]">92%</p>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E2E8F0] flex items-center gap-5 hover:shadow-md transition-shadow hover:border-[#D4AF37]/50">
+              <div className="bg-amber-50 p-4 rounded-xl text-amber-600">
+                <Megaphone className="w-8 h-8" />
+              </div>
+              <div>
+                <p className="text-sm text-[#64748B] font-bold">Pengumuman</p>
+                <p className="text-3xl font-black text-[#1E293B]">5</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Menu Umum */}
-        <div>
-          <h2 className="text-xl font-bold mb-5 text-[#334155] border-b border-[#E2E8F0] pb-2">Menu Navigasi</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {[
-              { name: "Anggota", icon: Users, color: "text-[#2563EB] bg-[#EFF6FF]", path: "/anggota" },
-              { name: "Materi", icon: BookOpen, color: "text-[#D97706] bg-[#FEF3C7]", path: "/materi" },
-              { name: "Absensi", icon: CalendarCheck, color: "text-[#059669] bg-[#D1FAE5]", path: "/absensi" },
-              { name: "Pengumuman", icon: Megaphone, color: "text-[#7C3AED] bg-[#EDE9FE]", path: "/pengumuman" },
-            ].map((menu, i) => (
-              <Link key={i} href={menu.path}>
-                <div className="p-6 rounded-2xl bg-[#FCFCFA] flex flex-col items-center justify-center shadow-sm border border-[#E2E8F0] hover:shadow-md hover:-translate-y-1 transition-all duration-300 gap-3">
-                  <div className={`p-3 rounded-xl ${menu.color}`}>
-                    <menu.icon className="w-7 h-7" />
-                  </div>
-                  <span className="font-semibold text-[#475569] text-sm tracking-wide">{menu.name}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* MENU KHUSUS ADMIN */}
-        {userRole === 'admin' && (
-          <div className="pt-4">
-            <h2 className="text-xl font-bold mb-5 text-[#9F1239] flex items-center gap-2 border-b border-[#E2E8F0] pb-2">
-              <Settings className="w-5 h-5" /> Panel Administrasi
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              <Link href="/scan">
-                <div className="p-6 rounded-2xl bg-[#FCFCFA] border border-[#E2E8F0] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col items-center gap-3">
-                  <div className="p-3 rounded-xl bg-[#FFE4E6] text-[#E11D48]">
-                    <ScanLine className="w-7 h-7" />
-                  </div>
-                  <span className="font-semibold text-[#475569] text-sm">Scan Kehadiran</span>
-                </div>
-              </Link>
-              <Link href="/tambah-anggota">
-                <div className="p-6 rounded-2xl bg-[#FCFCFA] border border-[#E2E8F0] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col items-center gap-3">
-                  <div className="p-3 rounded-xl bg-[#DBEAFE] text-[#2563EB]">
-                    <FilePlus className="w-7 h-7" />
-                  </div>
-                  <span className="font-semibold text-[#475569] text-sm text-center">Buat Akun & QR</span>
-                </div>
-              </Link>
-              <Link href="/tambah-agenda">
-                <div className="p-6 rounded-2xl bg-[#FCFCFA] border border-[#E2E8F0] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col items-center gap-3">
-                  <div className="p-3 rounded-xl bg-[#CCFBF1] text-[#0D9488]">
-                    <PlusCircle className="w-7 h-7" />
-                  </div>
-                  <span className="font-semibold text-[#475569] text-sm">Tambah Agenda</span>
-                </div>
-              </Link>
+          {/* Tabel / Aktivitas Terbaru */}
+          <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+              <h4 className="text-lg font-bold text-[#1E293B]">Aktivitas Sistem Terbaru</h4>
+            </div>
+            <div className="p-12 flex flex-col items-center justify-center text-[#94A3B8]">
+              <LayoutDashboard className="w-16 h-16 mb-4 opacity-30 text-[#D4AF37]" />
+              <p className="font-medium">Belum ada data aktivitas. Sistem siap digunakan.</p>
             </div>
           </div>
-        )}
 
-      </div>
+        </div>
+      </main>
+
     </div>
   );
 }
