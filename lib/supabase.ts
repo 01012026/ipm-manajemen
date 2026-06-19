@@ -1,7 +1,8 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'
 
-// Kita ambil kuncinya, atau kasih kunci bohongan pas lagi proses 'build' di Netlify biar dia nggak nangis
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://pengaman-build.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'pengaman-key-123';
+// Tarik kunci rahasia dari Netlify (Environment Variables)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Bikin jembatan ke database
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
