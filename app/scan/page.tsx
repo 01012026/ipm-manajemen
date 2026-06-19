@@ -1,70 +1,100 @@
 "use client";
 
 import { useState } from "react";
-import { Scanner } from "@yudiel/react-qr-scanner";
-import { ArrowLeft, ScanLine, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { Scanner } from "@yudiel/react-qr-scanner";
+import { ArrowLeft, Camera, CheckCircle2, RefreshCcw } from "lucide-react";
 
 export default function ScanPage() {
-  const [scanResult, setScanResult] = useState<string | null>(null);
+  const [scanResult, setScanResult] = useState("");
+
+  // Fungsi penangkap data QR Code
+  const handleScan = (result: any) => {
+    if (!result) return;
+    
+    let text = "";
+    // Nyesuain versi library biar anti-error
+    if (Array.isArray(result) && result.length > 0) {
+      text = result[0].rawValue;
+    } else if (typeof result === 'string') {
+      text = result;
+    } else if (result.text) {
+      text = result.text;
+    }
+    
+    if (text) {
+      setScanResult(text);
+      // Nanti di sini lu bisa tambahin script buat ngirim ke database Supabase
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white flex flex-col items-center p-4 md:p-8">
+    <div className="min-h-screen bg-[#F8FAFC] pb-20 font-sans">
       
-      {/* Header dengan tombol kembali */}
-      <div className="w-full max-w-md flex items-center gap-4 mb-8 pt-4">
-        <Link href="/">
-          <div className="p-2 bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-            <ArrowLeft className="w-6 h-6 text-slate-800 dark:text-white" />
-          </div>
+      {/* HEADER NAVY-GOLD */}
+      <div className="bg-[#1E293B] text-white p-6 md:p-8 rounded-b-3xl shadow-xl relative overflow-hidden">
+        <div className="absolute top-[-50%] right-[-10%] w-40 h-40 bg-[#D4AF37]/20 rounded-full blur-3xl" />
+        
+        <Link href="/" className="inline-flex items-center gap-2 text-[#D4AF37] hover:text-white transition-colors mb-6 relative z-10 font-bold">
+          <ArrowLeft className="w-5 h-5" /> Kembali ke Dashboard
         </Link>
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <ScanLine className="w-6 h-6 text-rose-500" />
+        
+        <h1 className="text-2xl md:text-3xl font-black text-[#F8FAFC] relative z-10 tracking-tight">
           Scan Kehadiran
         </h1>
-      </div>
-
-      {/* Area Kamera */}
-      <div className="w-full max-w-md bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">
-        <div className="aspect-square rounded-2xl overflow-hidden relative bg-black flex items-center justify-center border-4 border-slate-100 dark:border-slate-900">
-          
-          <Scanner
-            onScan={(result) => {
-              if (result && result.length > 0) {
-                setScanResult(result[0].rawValue);
-              }
-            }}
-            onError={(error: any) => console.log(error?.message || error)}
-            scanDelay={1000}
-          />
-
-          {/* Garis merah efek scanning */}
-          <div className="absolute top-1/2 left-0 w-full h-[2px] bg-rose-500 shadow-[0_0_15px_#f43f5e] animate-pulse" />
-        </div>
-        <p className="text-center text-sm font-medium text-slate-500 dark:text-slate-400 mt-4">
-          Arahkan QR Code Anggota ke dalam kotak kamera.
+        <p className="text-[#94A3B8] mt-2 text-sm font-medium tracking-wide relative z-10">
+          Arahkan kamera perangkat ke QR Code panitia
         </p>
       </div>
 
-      {/* Hasil Scan */}
-      {scanResult && (
-        <div className="w-full max-w-md mt-6 p-5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-2xl flex flex-col items-center text-center animate-in fade-in zoom-in duration-300 shadow-sm">
-          <CheckCircle2 className="w-12 h-12 text-emerald-500 mb-3" />
-          <h2 className="text-xl font-bold text-emerald-700 dark:text-emerald-400">Scan Berhasil!</h2>
-          <div className="mt-3 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700 w-full">
-            <p className="text-sm font-mono text-slate-700 dark:text-slate-300 break-all">
-              {scanResult}
-            </p>
-          </div>
-          <button 
-            onClick={() => setScanResult(null)}
-            className="mt-5 px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold transition shadow-md hover:shadow-lg"
-          >
-            Scan Lagi
-          </button>
-        </div>
-      )}
+      {/* KONTEN UTAMA */}
+      <div className="p-4 md:p-8 max-w-md mx-auto mt-4">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#E2E8F0] text-center">
+          
+          {!scanResult ? (
+            <>
+              {/* STATE 1: KAMERA NYALA */}
+              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600">
+                <Camera className="w-8 h-8" />
+              </div>
+              <h2 className="text-xl font-bold text-[#1E293B] mb-2">Kamera Aktif</h2>
+              <p className="text-[#64748B] text-sm mb-6 px-4">Pastikan posisi QR Code berada tepat di tengah area agar mudah terbaca oleh sistem.</p>
+              
+              {/* KOMPONEN KAMERA ASLI DARI LIBRARY */}
+              <div className="rounded-2xl overflow-hidden border-4 border-[#1E293B] shadow-inner mb-6 relative bg-black">
+                <Scanner 
+                  onScan={handleScan}
+                  formats={["qr_code"]}
+                />
+                {/* Efek Garis Scan Laser */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37] animate-[ping_2s_ease-in-out_infinite] shadow-[0_0_15px_#D4AF37] pointer-events-none"></div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* STATE 2: SUKSES SCAN */}
+              <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600 animate-bounce">
+                <CheckCircle2 className="w-10 h-10" />
+              </div>
+              <h2 className="text-2xl font-black text-[#1E293B] mb-2">Berhasil Discan!</h2>
+              <p className="text-[#64748B] text-sm mb-6">Data dari QR Code berhasil ditangkap oleh sistem.</p>
+              
+              <div className="bg-[#F8FAFC] border border-[#CBD5E1] p-4 rounded-xl mb-8 break-words text-left">
+                <span className="text-xs font-bold text-[#94A3B8] block mb-1">Hasil Teks/Link QR Code:</span>
+                <span className="text-[#1E293B] font-bold">{scanResult}</span>
+              </div>
 
+              <button 
+                onClick={() => setScanResult("")}
+                className="w-full bg-[#1E293B] hover:bg-[#0F172A] text-white font-bold py-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                <RefreshCcw className="w-5 h-5" /> Scan QR Lainnya
+              </button>
+            </>
+          )}
+
+        </div>
+      </div>
     </div>
   );
 }
