@@ -25,7 +25,8 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setErrorMsg("Gagal masuk: Email atau Password salah.");
+      // BONGKAR RAHASIA: Kita paksa nampilin pesan asli dari mesinnya
+      setErrorMsg(`PESAN DARI MESIN: ${error.message}`);
       setLoading(false);
     } else {
       router.push("/"); // Arahin ke Dashboard kalau sukses
@@ -36,7 +37,6 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl border border-[#E2E8F0] overflow-hidden">
         
-        {/* Header Kartu Login - Navy & Gold */}
         <div className="bg-[#1E293B] p-8 text-center relative overflow-hidden shadow-inner">
           <div className="absolute top-[-50%] right-[-10%] w-40 h-40 bg-[#D4AF37]/20 rounded-full blur-3xl" />
           <BookOpen className="w-12 h-12 text-[#D4AF37] mx-auto mb-4 relative z-10" />
@@ -48,18 +48,16 @@ export default function LoginPage() {
           </p>
         </div>
         
-        {/* Form Login */}
         <div className="p-8">
           <form onSubmit={handleLogin} className="space-y-6">
             
-            {/* Notifikasi Error */}
+            {/* Notifikasi Error akan muncul di sini */}
             {errorMsg && (
               <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium text-center animate-pulse">
                 {errorMsg}
               </div>
             )}
             
-            {/* Input Email/Username */}
             <div className="space-y-2">
               <label className="text-sm font-bold text-[#334155] tracking-wide">Email / Username</label>
               <input 
@@ -72,7 +70,6 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Input Password */}
             <div className="space-y-2">
               <label className="text-sm font-bold text-[#334155] tracking-wide">Password</label>
               <div className="relative">
@@ -94,7 +91,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Tombol Submit */}
             <button 
               type="submit" 
               disabled={loading}
