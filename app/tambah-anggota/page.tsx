@@ -1,108 +1,153 @@
 "use client";
 
-import { useState } from "react";
-import { QRCodeCanvas } from "qrcode.react";
-import { ArrowLeft, UserPlus, Info } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "../lib/supabase";
+import { Users, BookOpen, CalendarCheck, Megaphone, LogOut, LayoutDashboard, Settings, User, Menu, X, QrCode, ScanLine, Wallet, Archive } from "lucide-react";
 
-export default function TambahAnggotaPage() {
-  const [nis, setNis] = useState("");
-  const [nama, setNama] = useState("");
-  const [qrGenerated, setQrGenerated] = useState(false);
+export default function DashboardPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleGenerateQR = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (nis && nama) {
-      setQrGenerated(true);
-    }
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+      } else {
+        setEmail(session.user.email || "");
+        setLoading(false);
+      }
+    };
+    checkUser();
+  }, [router]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
   };
 
+  if (loading) return (
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D4AF37]"></div>
+    </div>
+  );
+
   return (
-    <div className="w-full text-[#2C3E50] p-4 md:p-8 font-sans">
-      <div className="max-w-xl mx-auto space-y-6">
+    <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+      
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm transition-opacity" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
+
+      <aside className={`fixed md:static inset-y-0 left-0 w-64 bg-[#1E293B] text-white flex flex-col shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}>
+        <div className="p-6 border-b border-slate-700/50 flex justify-between items-center">
+          <div className="flex items-center gap-3 text-[#D4AF37]">
+            <BookOpen className="w-8 h-8" />
+            <h1 className="font-bold text-xl tracking-wider">IPM APP</h1>
+          </div>
+          <button className="md:hidden text-slate-300 hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>
+            <X className="w-6 h-6" />
+          </button>
+        </div>
         
-        {/* Header */}
-        <div className="flex items-center gap-4 pt-4 mb-8">
-          <Link href="/">
-            <div className="p-2.5 bg-[#FCFCFA] shadow-sm border border-[#E2E8F0] rounded-xl hover:bg-[#F1F5F9] transition">
-              <ArrowLeft className="w-5 h-5 text-[#475569]" />
-            </div>
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
+          <Link href="/" className="flex items-center gap-3 bg-[#D4AF37] text-[#1E293B] px-4 py-3.5 rounded-xl font-bold transition-all shadow-md">
+            <LayoutDashboard className="w-5 h-5" /> Dashboard
           </Link>
-          <h1 className="text-2xl font-bold flex items-center gap-2 text-[#1E293B] tracking-tight">
-            <UserPlus className="w-6 h-6 text-[#2563EB]" />
-            Registrasi & Cetak QR
-          </h1>
-        </div>
+          <Link href="/anggota" className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 hover:text-white px-4 py-3.5 rounded-xl font-medium transition-all">
+            <Users className="w-5 h-5" /> Anggota
+          </Link>
+          <Link href="/materi" className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 hover:text-white px-4 py-3.5 rounded-xl font-medium transition-all">
+            <BookOpen className="w-5 h-5" /> Materi
+          </Link>
+          <Link href="/absensi" className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 hover:text-white px-4 py-3.5 rounded-xl font-medium transition-all">
+            <CalendarCheck className="w-5 h-5" /> Absensi
+          </Link>
+          <Link href="/scan" className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 hover:text-white px-4 py-3.5 rounded-xl font-medium transition-all">
+            <ScanLine className="w-5 h-5" /> Scan QR
+          </Link>
+          <Link href="/keuangan" className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 hover:text-white px-4 py-3.5 rounded-xl font-medium transition-all">
+            <Wallet className="w-5 h-5" /> Keuangan
+          </Link>
+          <Link href="/pengarsipan" className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 hover:text-white px-4 py-3.5 rounded-xl font-medium transition-all">
+            <Archive className="w-5 h-5" /> Pengarsipan
+          </Link>
+          <Link href="/pengaturan" className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 hover:text-white px-4 py-3.5 rounded-xl font-medium transition-all">
+            <Settings className="w-5 h-5" /> Pengaturan
+          </Link>
+        </nav>
 
-        {/* Form Input */}
-        <div className="bg-[#FCFCFA] p-8 rounded-2xl shadow-sm border border-[#E2E8F0]">
-          <form onSubmit={handleGenerateQR} className="space-y-5">
-            <div>
-              <label className="block text-sm font-bold text-[#475569] mb-2 tracking-wide">NOMOR INDUK SISWA (NIS)</label>
-              <input 
-                type="text" 
-                placeholder="Masukkan NIS..."
-                className="w-full p-3.5 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition text-[#1E293B]"
-                value={nis}
-                onChange={(e) => {
-                  setNis(e.target.value);
-                  setQrGenerated(false); 
-                }}
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-[#475569] mb-2 tracking-wide">NAMA LENGKAP</label>
-              <input 
-                type="text" 
-                placeholder="Masukkan nama lengkap..."
-                className="w-full p-3.5 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition text-[#1E293B]"
-                value={nama}
-                onChange={(e) => {
-                  setNama(e.target.value);
-                  setQrGenerated(false);
-                }}
-                required
-              />
-            </div>
-            <button 
-              type="submit"
-              className="w-full bg-[#1E293B] text-white font-bold py-4 rounded-xl hover:bg-[#0F172A] transition shadow-md mt-4 tracking-wide"
-            >
-              Cetak QR Code
+        <div className="p-4 border-t border-slate-700/50">
+          <button onClick={handleLogout} className="flex items-center justify-center gap-3 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-4 py-3.5 rounded-xl font-bold transition-all w-full">
+            <LogOut className="w-5 h-5" /> Keluar
+          </button>
+        </div>
+      </aside>
+
+      <main className="flex-1 flex flex-col h-screen overflow-hidden w-full relative">
+        <header className="bg-white shadow-sm border-b border-[#E2E8F0] p-4 flex justify-between items-center relative z-10 sticky top-0">
+          <div className="flex items-center gap-3">
+            <button className="md:hidden text-[#1E293B] p-2 bg-slate-100 rounded-lg" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu className="w-6 h-6" />
             </button>
-          </form>
-        </div>
+            <h2 className="text-xl font-bold text-[#1E293B] hidden sm:block">Sistem Informasi Manajemen</h2>
+          </div>
+          <div className="flex items-center gap-2 bg-[#F8FAFC] py-2 px-3 md:px-4 rounded-full border border-[#CBD5E1] shadow-sm max-w-[200px] md:max-w-none">
+            <User className="w-4 h-4 md:w-5 md:h-5 text-[#94A3B8] shrink-0" />
+            <span className="text-xs md:text-sm font-bold text-[#334155] truncate">{email}</span>
+            <span className="bg-[#1E293B] text-[#D4AF37] text-[10px] md:text-xs font-bold px-2 py-1 rounded-md ml-1 shrink-0">ADMIN</span>
+          </div>
+        </header>
 
-        {/* Hasil Cetak QR Code */}
-        {qrGenerated && (
-          <div className="bg-[#FCFCFA] p-8 rounded-2xl shadow-sm border border-[#E2E8F0] flex flex-col items-center animate-in fade-in zoom-in duration-300">
-            <h2 className="text-lg font-bold text-[#1E293B] mb-6 uppercase tracking-widest border-b border-[#E2E8F0] pb-2 w-full text-center">Kartu Akses Anggota</h2>
-            
-            <div className="p-5 border-2 border-dashed border-[#CBD5E1] rounded-2xl bg-white shadow-inner mb-6">
-              <QRCodeCanvas 
-                value={nis} 
-                size={220}
-                bgColor={"#ffffff"}
-                fgColor={"#1E293B"}
-                level={"H"}
-                includeMargin={true}
-              />
-            </div>
-            
-            <p className="font-bold text-[#1E293B] text-xl text-center uppercase tracking-wide">{nama}</p>
-            <p className="text-[#64748B] font-mono mt-1 text-lg">NIS: {nis}</p>
-            
-            <div className="mt-8 bg-[#EFF6FF] p-4 rounded-xl flex items-start gap-3 border border-[#BFDBFE]">
-              <Info className="w-5 h-5 text-[#2563EB] shrink-0 mt-0.5" />
-              <p className="text-sm text-[#1E3A8A] leading-relaxed">
-                Silakan ambil tangkapan layar (screenshot) area ini dan kirimkan kepada anggota yang bersangkutan sebagai kartu akses absen mereka.
-              </p>
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          <div className="bg-[#1E293B] rounded-3xl p-6 md:p-8 text-white shadow-xl mb-8 relative overflow-hidden">
+            <div className="absolute top-[-50%] right-[-5%] w-64 h-64 bg-[#D4AF37]/20 rounded-full blur-3xl" />
+            <div className="absolute bottom-[-20%] left-[-5%] w-40 h-40 bg-blue-500/20 rounded-full blur-3xl" />
+            <h3 className="text-2xl md:text-3xl font-bold mb-2 relative z-10 tracking-tight">Assalamu'alaikum, Admin!</h3>
+            <p className="text-[#94A3B8] relative z-10 text-sm md:text-base">Selamat datang di pusat kendali Sistem Informasi Manajemen IPM.</p>
+          </div>
+
+          <div className="mb-8">
+            <h4 className="text-lg font-bold text-[#1E293B] mb-4">Menu Navigasi</h4>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              
+              <Link href="/anggota" className="bg-white p-6 rounded-2xl shadow-sm border border-[#E2E8F0] flex flex-col items-center justify-center gap-4 hover:shadow-md transition-all group">
+                <div className="bg-blue-50 p-4 rounded-2xl text-blue-600 group-hover:scale-110 transition-transform"><Users className="w-8 h-8" /></div>
+                <p className="text-[#64748B] font-bold text-sm md:text-base text-center">Anggota</p>
+              </Link>
+              <Link href="/materi" className="bg-white p-6 rounded-2xl shadow-sm border border-[#E2E8F0] flex flex-col items-center justify-center gap-4 hover:shadow-md transition-all group">
+                <div className="bg-amber-50 p-4 rounded-2xl text-amber-600 group-hover:scale-110 transition-transform"><BookOpen className="w-8 h-8" /></div>
+                <p className="text-[#64748B] font-bold text-sm md:text-base text-center">Materi</p>
+              </Link>
+              <Link href="/absensi" className="bg-white p-6 rounded-2xl shadow-sm border border-[#E2E8F0] flex flex-col items-center justify-center gap-4 hover:shadow-md transition-all group">
+                <div className="bg-emerald-50 p-4 rounded-2xl text-emerald-600 group-hover:scale-110 transition-transform"><CalendarCheck className="w-8 h-8" /></div>
+                <p className="text-[#64748B] font-bold text-sm md:text-base text-center">Absensi</p>
+              </Link>
+              <Link href="/scan" className="bg-white p-6 rounded-2xl shadow-sm border border-[#E2E8F0] flex flex-col items-center justify-center gap-4 hover:shadow-md transition-all group">
+                <div className="bg-purple-50 p-4 rounded-2xl text-purple-600 group-hover:scale-110 transition-transform"><ScanLine className="w-8 h-8" /></div>
+                <p className="text-[#64748B] font-bold text-sm md:text-base text-center">Scan QR</p>
+              </Link>
+              <Link href="/keuangan" className="bg-white p-6 rounded-2xl shadow-sm border border-[#E2E8F0] flex flex-col items-center justify-center gap-4 hover:shadow-md transition-all group">
+                <div className="bg-green-50 p-4 rounded-2xl text-green-600 group-hover:scale-110 transition-transform"><Wallet className="w-8 h-8" /></div>
+                <p className="text-[#64748B] font-bold text-sm md:text-base text-center">Keuangan</p>
+              </Link>
+              <Link href="/pengarsipan" className="bg-white p-6 rounded-2xl shadow-sm border border-[#E2E8F0] flex flex-col items-center justify-center gap-4 hover:shadow-md transition-all group">
+                <div className="bg-orange-50 p-4 rounded-2xl text-orange-600 group-hover:scale-110 transition-transform"><Archive className="w-8 h-8" /></div>
+                <p className="text-[#64748B] font-bold text-sm md:text-base text-center">Pengarsipan</p>
+              </Link>
+              <Link href="/pengaturan" className="bg-white p-6 rounded-2xl shadow-sm border border-[#E2E8F0] flex flex-col items-center justify-center gap-4 hover:shadow-md transition-all group">
+                <div className="bg-slate-100 p-4 rounded-2xl text-slate-600 group-hover:scale-110 transition-transform"><Settings className="w-8 h-8" /></div>
+                <p className="text-[#64748B] font-bold text-sm md:text-base text-center">Pengaturan</p>
+              </Link>
+
             </div>
           </div>
-        )}
-
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
