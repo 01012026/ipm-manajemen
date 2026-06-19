@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { Users, CalendarCheck, ScanLine, Settings, FilePlus, Megaphone, PlusCircle, BookOpen } from "lucide-react";
+import { Users, CalendarCheck, ScanLine, Settings, FilePlus, Megaphone, PlusCircle, BookOpen, LogOut } from "lucide-react";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -30,6 +30,11 @@ export default function Dashboard() {
     checkSession();
   }, [router]);
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
   if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center py-32 text-[#2C3E50]">
@@ -39,12 +44,24 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="w-full text-[#2C3E50] font-sans pb-10 pt-4 px-4 md:px-8">
+    <div className="w-full min-h-screen text-[#2C3E50] font-sans pb-10 pt-4 px-4 md:px-8">
       <div className="max-w-5xl mx-auto space-y-8">
         
         {/* Header Banner - Navy & Gold Classic */}
-        <div className="bg-[#1E293B] rounded-2xl p-8 text-white relative overflow-hidden shadow-lg border border-[#334155]">
+        <div className="bg-[#1E293B] rounded-3xl p-8 text-white relative overflow-hidden shadow-xl border border-[#334155]">
           <div className="absolute top-[-50%] right-[-10%] w-64 h-64 bg-[#D4AF37]/20 rounded-full blur-3xl" />
+          
+          {/* Tombol Logout */}
+          <div className="absolute top-6 right-6 z-20">
+            <button 
+              onClick={handleLogout} 
+              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-sm text-white transition-all shadow-sm"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline font-medium">Keluar</span>
+            </button>
+          </div>
+
           <div className="relative z-10">
             <p className="text-[#94A3B8] mb-1 text-sm md:text-base font-medium tracking-wide">Assalamu'alaikum,</p>
             <h1 className="text-2xl md:text-3xl font-bold text-[#F8FAFC] mb-5 tracking-tight">
