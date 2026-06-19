@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabase"; // Pastiin path ini bener ke file supabase lu
+import { supabase } from "../../lib/supabase";
 import { Eye, EyeOff, LogIn, BookOpen } from "lucide-react";
 
 export default function LoginPage() {
@@ -61,10 +61,10 @@ export default function LoginPage() {
             
             {/* Input Email/Username */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#334155] tracking-wide">Email Akun</label>
+              <label className="text-sm font-bold text-[#334155] tracking-wide">Email / Username</label>
               <input 
-                type="email" 
-                placeholder="Masukkan email..." 
+                type="text" 
+                placeholder="Masukkan email atau username..." 
                 className="w-full px-4 py-3 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#1E293B] focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 focus:bg-white outline-none transition-all placeholder:text-slate-400 font-medium"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
