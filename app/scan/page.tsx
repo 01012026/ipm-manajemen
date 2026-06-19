@@ -28,13 +28,16 @@ export default function ScanPage() {
       <div className="w-full max-w-md bg-slate-800 p-4 rounded-3xl shadow-2xl border border-slate-700">
         <div className="aspect-square rounded-2xl overflow-hidden relative bg-black flex items-center justify-center">
           
-          {/* Mesin Scanner */}
+          {/* Mesin Scanner YANG UDAH DIPERBARUI */}
           <Scanner
-            onResult={(text) => setScanResult(text)}
-            onError={(error) => console.log(error?.message)}
-            options={{
-              delayBetweenScanAttempts: 1000, // Jeda antar scan
+            onScan={(result) => {
+              // Di versi baru, hasilnya bentuk array, jadi kita ambil urutan ke-0
+              if (result && result.length > 0) {
+                setScanResult(result[0].rawValue);
+              }
             }}
+            onError={(error: any) => console.log(error?.message || error)}
+            scanDelay={1000}
           />
 
           {/* Garis merah efek scanning */}
