@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "./lib/supabase";
+import { supabase } from "../lib/supabase";
 import { Users, BookOpen, CalendarCheck, LogOut, LayoutDashboard, QrCode, ScanLine, Wallet, Archive } from "lucide-react";
 
 export default function DashboardPage() {
