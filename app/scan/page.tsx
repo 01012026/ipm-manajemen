@@ -9,8 +9,8 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 export default function ScanPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [namaKegiatan, setNamaKegiatan] = useState("");
-  const [namaAnggota, setNamaAnggota] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [isScanned, setIsScanned] = useState(false); // Kunci biar ga ke-scan 2 kali
 
   useEffect(() => {
     const cekLogin = async () => {
@@ -18,26 +18,41 @@ export default function ScanPage() {
       if (!session) {
         router.push("/login");
       } else {
+        // Tarik email otomatis dari sistem, GA BISA BOHONG!
+        setUserEmail(session.user.email); 
         setLoading(false);
       }
     };
     cekLogin();
   }, [router]);
 
-  const handleAbsen = async () => {
-    if (!namaKegiatan || !namaAnggota) return alert("Lengkapi data kehadiran!");
-    
-    const { error } = await supabase.from("absensi").insert([{ 
-      nama_kegiatan: namaKegiatan, 
-      nama_anggota: namaAnggota 
-    }]);
+  const handleScan = async (result: any) => {
+    // Kalau udah berhasil scan, gembok kameranya biar ga ngirim data dobel
+    if (isScanned) return;
 
-    if (error) {
-      alert("Gagal mencatat: " + error.message);
-    } else {
-      alert(`Berhasil! Kehadiran ${namaAnggota} tercatat.`);
-      setNamaAnggota(""); 
-      router.push("/absensi"); 
+    let scannedText = "";
+    if (result && result.length > 0) {
+      scannedText = result[0].rawValue;
+    } else if (result && typeof result === "string") {
+      scannedText = result;
+    }
+
+    if (scannedText) {
+      setIsScanned(true); // Gembok aktif
+      
+      // Langsung absen otomatis tanpa perlu klik tombol!
+      const { error } = await supabase.from("absensi").insert([{ 
+        nama_kegiatan: scannedText, 
+        nama_anggota: userEmail // Ini ditarik otomatis dari akun yang login
+      }]);
+
+      if (error) {
+        alert("Gagal mencatat: " + error.message);
+        setIsScanned(false); // Buka gembok kalau error
+      } else {
+        alert(`✅ Berhasil! Kehadiran untuk ${userEmail} tercatat.`);
+        router.push("/absensi"); 
+      }
     }
   };
 
@@ -59,49 +74,29 @@ export default function ScanPage() {
       <div className="p-4 md:p-8 max-w-md mx-auto space-y-6 mt-4">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           
+          <div className="text-center mb-4">
+            <p className="text-sm font-bold text-slate-500">Mencatat kehadiran untuk:</p>
+            <p className="text-[#1E293B] font-black text-lg bg-slate-100 py-2 mt-1 rounded-lg border border-slate-200">{userEmail}</p>
+          </div>
+
           {/* Kamera Scanner Asli */}
-          <div className="overflow-hidden rounded-xl border-2 border-slate-200 mb-6 bg-black">
+          <div className="overflow-hidden rounded-xl border-2 border-slate-200 mb-6 bg-black relative">
+            {isScanned && (
+              <div className="absolute inset-0 z-10 bg-black/70 flex items-center justify-center backdrop-blur-sm">
+                <p className="text-white font-bold animate-pulse">Memproses Kehadiran...</p>
+              </div>
+            )}
             <Scanner
-              onScan={(result: any) => {
-                // Logika anti-error buat nangkap teks dari QR Code
-                if (result && result.length > 0) {
-                  setNamaKegiatan(result[0].rawValue);
-                } else if (result && typeof result === "string") {
-                  setNamaKegiatan(result);
-                }
-              }}
+              onScan={handleScan}
               onError={(error: any) => console.log("Kamera error:", error?.message)}
             />
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-bold text-[#1E293B] mb-1">Nama Kegiatan (Lihat di QR)</label>
-              <input 
-                type="text" 
-                placeholder="Arahkan kamera ke QR..." 
-                value={namaKegiatan} 
-                onChange={(e) => setNamaKegiatan(e.target.value)} 
-                className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#D4AF37] outline-none" 
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-[#1E293B] mb-1">Nama Anggota Yang Hadir</label>
-              <input 
-                type="text" 
-                placeholder="Masukkan nama kamu..." 
-                value={namaAnggota} 
-                onChange={(e) => setNamaAnggota(e.target.value)} 
-                className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#D4AF37] outline-none" 
-              />
-            </div>
-            <button 
-              onClick={handleAbsen} 
-              className="w-full bg-[#1E293B] text-white p-4 rounded-xl font-bold mt-2 hover:bg-[#0F172A] transition-colors shadow-md"
-            >
-              Catat Kehadiran
-            </button>
+          <div className="text-center">
+            <p className="text-sm font-bold text-[#1E293B]">Arahkan kamera ke QR Code</p>
+            <p className="text-xs text-slate-500 mt-1">Sistem akan otomatis mencatat data Anda.</p>
           </div>
+
         </div>
       </div>
     </div>
