@@ -9,40 +9,46 @@ export default function AbsensiPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data, error } = await supabase.from("absensi").select("*").order("id", { ascending: false });
-      if (!error && data) setDataAbsen(data);
+      const { data } = await supabase.from("absensi").select("*").order("id", { ascending: false });
+      if (data) setDataAbsen(data);
     };
     fetchData();
   }, []);
 
+  // KODINGAN PINTAR: Ngelompokin data 1 tabel berdasarkan "nama_kegiatan"
+  const kegiatanUnik = Array.from(new Set(dataAbsen.map(item => item.nama_kegiatan)));
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans pb-20">
-      <div className="bg-[#1E293B] text-white p-6 md:p-8 rounded-b-3xl shadow-xl">
-        <Link href="/" className="inline-flex items-center gap-2 text-[#D4AF37] mb-6 font-bold"><ArrowLeft /> Kembali</Link>
-        <h1 className="text-2xl md:text-3xl font-black">Rekap Absensi</h1>
+    <div className="min-h-screen bg-[#F8FAFC] pb-20 font-sans">
+      <div className="bg-[#1E293B] p-6 text-white rounded-b-3xl shadow-xl">
+        <Link href="/" className="text-[#D4AF37] flex gap-2 font-bold mb-4"><ArrowLeft/> Kembali</Link>
+        <h1 className="text-2xl font-black">Rekap Kehadiran Terstruktur</h1>
       </div>
 
-      <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-4">
-        {dataAbsen.length === 0 ? (
-          <p className="text-center text-slate-400 py-10 bg-white rounded-2xl border border-slate-200">Belum ada data kehadiran.</p>
-        ) : (
-          <div className="space-y-3">
-            {dataAbsen.map((item) => (
-              <div key={item.id} className="bg-white p-4 rounded-xl border border-[#E2E8F0] shadow-sm flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="bg-emerald-50 text-emerald-600 p-3 rounded-xl"><CalendarCheck className="w-5 h-5" /></div>
-                  <div>
-                    <p className="font-bold text-[#1E293B]">{item.nama_anggota}</p>
-                    <p className="text-xs text-slate-500 font-medium">Hadir di: {item.nama_kegiatan}</p>
-                  </div>
+      <div className="p-6 max-w-4xl mx-auto space-y-8 mt-4">
+        {kegiatanUnik.length === 0 ? <p className="text-center text-slate-500">Belum ada absen.</p> : null}
+
+        {/* Bikin kotak/tabel terpisah untuk setiap kegiatan */}
+        {kegiatanUnik.map((kegiatan) => (
+          <div key={kegiatan} className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+            <div className="bg-[#D4AF37] text-[#1E293B] px-6 py-4 font-black flex justify-between">
+              <h3>Kegiatan: {kegiatan}</h3>
+              <span className="bg-white px-3 py-1 rounded-full text-xs">
+                {dataAbsen.filter(a => a.nama_kegiatan === kegiatan).length} Hadir
+              </span>
+            </div>
+            
+            <div className="p-2">
+              {dataAbsen.filter((absen) => absen.nama_kegiatan === kegiatan).map((item, index) => (
+                <div key={item.id} className="flex items-center gap-4 p-4 border-b last:border-b-0">
+                  <div className="font-bold text-slate-400 w-6">{index + 1}.</div>
+                  <div className="flex-1 font-bold text-[#1E293B]">{item.nama_anggota}</div>
+                  <div className="text-xs text-emerald-600 bg-emerald-100 px-3 py-1 rounded-full font-bold">Hadir</div>
                 </div>
-                <div className="text-right">
-                  <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">HADIR</span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );

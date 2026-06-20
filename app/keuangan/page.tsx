@@ -1,10 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import Link from "next/link";
 import { ArrowLeft, Wallet, Plus, X, ArrowDownRight, ArrowUpRight } from "lucide-react";
 
 export default function KeuanganPage() {
+  const router = useRouter();
+  const [role, setRole] = useState("anggota");
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dataKeuangan, setDataKeuangan] = useState<any[]>([]);
   const [saldo, setSaldo] = useState(0);
@@ -14,12 +18,10 @@ export default function KeuanganPage() {
   const [jumlah, setJumlah] = useState("");
   const [jenis, setJenis] = useState("Pemasukan");
 
-  // Fungsi Ambil Data dari Supabase
   const fetchData = async () => {
     const { data, error } = await supabase.from("keuangan").select("*").order("id", { ascending: false });
     if (!error && data) {
       setDataKeuangan(data);
-      // Hitung Total Saldo
       let total = 0;
       data.forEach((item) => {
         if (item.jenis === "Pemasukan") total += Number(item.jumlah);
@@ -30,10 +32,31 @@ export default function KeuanganPage() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    const initData = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+        return;
+      }
+      
+      // Cek Role
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .single();
 
-  // Fungsi Simpan Data
+      if (profile) {
+        setRole(profile.role.toLowerCase());
+      }
+      
+      setLoading(false);
+      fetchData();
+    };
+    
+    initData();
+  }, [router]);
+
   const handleSimpan = async () => {
     if (!keterangan || !jumlah) return alert("Isi form dengan lengkap!");
     const { error } = await supabase.from("keuangan").insert([{ keterangan, jumlah: Number(jumlah), jenis }]);
@@ -41,12 +64,18 @@ export default function KeuanganPage() {
       alert("Gagal: " + error.message);
     } else {
       alert("Data berhasil disimpan!");
-      setIsModalOpen(false);
-      setKeterangan("");
-      setJumlah("");
-      fetchData(); // Refresh data tanpa reload web
+      setIsModalOpen(false); 
+      setKeterangan(""); 
+      setJumlah(""); 
+      fetchData();
     }
   };
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D4AF37]"></div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans pb-20">
@@ -54,9 +83,13 @@ export default function KeuanganPage() {
         <Link href="/" className="inline-flex items-center gap-2 text-[#D4AF37] mb-6 font-bold relative z-10"><ArrowLeft /> Kembali</Link>
         <div className="flex justify-between items-center relative z-10">
             <h1 className="text-2xl md:text-3xl font-black">Keuangan</h1>
-            <button onClick={() => setIsModalOpen(true)} className="bg-[#D4AF37] hover:bg-[#B8962E] text-[#1E293B] px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors">
-                <Plus className="w-5 h-5" /> Tambah Data
-            </button>
+            
+            {/* TOMBOL TAMBAH DATA KHUSUS ADMIN */}
+            {role === "admin" && (
+              <button onClick={() => setIsModalOpen(true)} className="bg-[#D4AF37] hover:bg-[#B8962E] text-[#1E293B] px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors">
+                  <Plus className="w-5 h-5" /> Tambah Data
+              </button>
+            )}
         </div>
       </div>
 
@@ -91,7 +124,8 @@ export default function KeuanganPage() {
         </div>
       </div>
 
-      {isModalOpen && (
+      {/* MODAL FORM KHUSUS ADMIN */}
+      {isModalOpen && role === "admin" && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-2xl">
             <div className="flex justify-between items-center mb-6">
