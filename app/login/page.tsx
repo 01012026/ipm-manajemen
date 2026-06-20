@@ -44,7 +44,7 @@ export default function LoginPage() {
             Selamat Datang
           </h1>
           <p className="text-[#94A3B8] mt-2 text-sm font-medium tracking-wide relative z-10">
-            Sistem Informasi Manajemen IPM
+            Sistem Informasi Manajemen IPM SMK Muhammadiyah Belik
           </p>
         </div>
         

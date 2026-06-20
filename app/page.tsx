@@ -119,7 +119,7 @@ export default function DashboardPage() {
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
           <div className="bg-[#1E293B] rounded-3xl p-8 text-white mb-8 relative overflow-hidden">
             <h3 className="text-3xl font-bold mb-2">Assalamu'alaikum!</h3>
-            <p className="text-[#94A3B8]">Selamat datang di Sistem Informasi Manajemen IPM.</p>
+            <p className="text-[#94A3B8]">Selamat datang di Sistem Informasi Manajemen IPM SMK MBP.</p>
           </div>
 
           <div className="mb-8">
