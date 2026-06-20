@@ -10,7 +10,7 @@ export default function ScanPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState("");
-  const [isScanned, setIsScanned] = useState(false); // Kunci biar ga ke-scan 2 kali
+  const [isScanned, setIsScanned] = useState(false);
 
   useEffect(() => {
     const cekLogin = async () => {
@@ -18,8 +18,8 @@ export default function ScanPage() {
       if (!session) {
         router.push("/login");
       } else {
-        // Tarik email otomatis dari sistem, GA BISA BOHONG!
-        setUserEmail(session.user.email); 
+        // Fix: Inject default string jika email merespon undefined
+        setUserEmail(session.user.email ?? ""); 
         setLoading(false);
       }
     };
@@ -27,7 +27,6 @@ export default function ScanPage() {
   }, [router]);
 
   const handleScan = async (result: any) => {
-    // Kalau udah berhasil scan, gembok kameranya biar ga ngirim data dobel
     if (isScanned) return;
 
     let scannedText = "";
@@ -38,17 +37,16 @@ export default function ScanPage() {
     }
 
     if (scannedText) {
-      setIsScanned(true); // Gembok aktif
+      setIsScanned(true); 
       
-      // Langsung absen otomatis tanpa perlu klik tombol!
       const { error } = await supabase.from("absensi").insert([{ 
         nama_kegiatan: scannedText, 
-        nama_anggota: userEmail // Ini ditarik otomatis dari akun yang login
+        nama_anggota: userEmail 
       }]);
 
       if (error) {
         alert("Gagal mencatat: " + error.message);
-        setIsScanned(false); // Buka gembok kalau error
+        setIsScanned(false); 
       } else {
         alert(`✅ Berhasil! Kehadiran untuk ${userEmail} tercatat.`);
         router.push("/absensi"); 
@@ -79,7 +77,6 @@ export default function ScanPage() {
             <p className="text-[#1E293B] font-black text-lg bg-slate-100 py-2 mt-1 rounded-lg border border-slate-200">{userEmail}</p>
           </div>
 
-          {/* Kamera Scanner Asli */}
           <div className="overflow-hidden rounded-xl border-2 border-slate-200 mb-6 bg-black relative">
             {isScanned && (
               <div className="absolute inset-0 z-10 bg-black/70 flex items-center justify-center backdrop-blur-sm">
